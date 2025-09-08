@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)https://mahdi.github.io/FreeWireGuard/WireGuard_mahdi.html -->
+<html lang="fa"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>body {transition: opacity ease-in 0.2s; } 
+body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
+</style>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WireGuard_mahdi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        pre {
+            text-align: left;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        #lockScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="lockScreen">
+        <h2>لطفاً رمز عبور را وارد کنید</h2>
+        <input type="password" id="passwordInput" placeholder="رمز عبور">
+        <button onclick="checkPassword()">ورود</button>
+    </div>
+
+    <div id="mainContent" style="display: none;">
+        <h2>WireGuard_mahdi</h2>
+        <div class="container">
+            <button onclick="generateConfig()">تولید</button>
+            <button onclick="copyToClipboard()">کپی کردن</button>
+            <button onclick="saveToFile()">ذخیره</button>
+            <pre id="output">اینجا نتیجه نمایش داده می‌شود...</pre>
+        </div>
+
+        <div class="footer">
+            ساخته شده توسط <a href="https://t.me/mahdipanelmarker" target="_blank">mahdi</a>
+        </div>
+    </div>
+
+    <script>
+        function checkPassword() {
+            let password = document.getElementById("passwordInput").value;
+            if (password === "mahdi") {
+                document.getElementById("lockScreen").style.display = "none";
+                document.getElementById("mainContent").style.display = "block";
+            } else {
+                alert("رمز اشتباه است!");
+            }
+        }
+
+        async function generatePrivateKey() {
+            const key = new Uint8Array(32);
+            window.crypto.getRandomValues(key);
+            return btoa(String.fromCharCode(...key));
+        }
+
+        function generateRandomIP() {
+            return "80.81." + (Math.floor(Math.random() * 256)) + "." + (Math.floor(Math.random() * 256));
+        }
+
+        async function generateConfig() {
+            let privateKey = await generatePrivateKey();
+            let address = "25." + (Math.floor(Math.random() * 256)) + "." + (Math.floor(Math.random() * 256)) + "." + (Math.floor(Math.random() * 256)) + "/24";
+            let dns = generateRandomIP() + ", 10.202.10.10";
+            let port = Math.floor(Math.random() * (65535 - 1024)) + 1024;
+            let mtu = Math.floor(Math.random() * (1500 - 1280)) + 1280;
+
+            let config = `[Interface]
+PrivateKey = ${privateKey}
+Address = ${address}
+DNS = ${dns}
+MTU = ${mtu}
+ListenPort = ${port}`;
+
+            document.getElementById("output").textContent = config;
+        }
+
+        function copyToClipboard() {
+            let text = document.getElementById("output").textContent;
+            let textarea = document.createElement("textarea");
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("متن با موفقیت کپی شد!");
+        }
+
+        function saveToFile() {
+            let filename = prompt("نام فایل را وارد کنید:");
+            if (!filename) return;
+            if (!filename.endsWith(".conf")) {
+                filename += ".conf";
+            }
+            let text = document.getElementById("output").textContent;
+            let blob = new Blob([text], { type: "application/octet-stream" });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+
+
+
+</body></html>
